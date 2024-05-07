@@ -1,36 +1,46 @@
+const _ = require('lodash')
+
 /* global WIKI */
 
-const _ = require('lodash')
-var OAuth2Strategy = require('passport-oauth2')
+// ------------------------------------
+// ORCID Account
+// ------------------------------------
 
+const OAuth2Strategy = require('passport-oauth2').Strategy
 
 module.exports = {
-    init(passport, conf) {
-        passport.use('orcid',
-            new OAuth2Strategy({
-                authorizationURL: 'https://orcid.org/oauth/authorize',
-                tokenURL: 'https://orcid.org/oauth/token',
-                clientID: conf.clientId,
-                clientSecret: conf.clientSecret,
-                callbackURL: conf.callbackURL,
-                passReqToCallback: true,
-                scope: '/authenticate',
-                state: true
-            }, async (accessToken, refreshToken, params, profile, cb) => {
-                try {
-                    const user = await WIKI.models.users.processProfile({
-                        profile: {
-                            email: "not-really-an-email-" + params.orcid + "@fake.com",
-                            displayName: params.name,
-                            ...profile,
-                        },
-                        providerKey: 'orcid'
-                    })
-                    cb(null, user)
-                } catch (err) {
-                    cb(err, null)
-                }
-            })
-        )
+  init (passport, conf) {
+    var client = new OAuth2Strategy({
+      authorizationURL: 'https://orcid.org/oauth/authorize',
+      tokenURL: 'https://orcid.org/oauth/token',
+      clientID: conf.clientId,
+      clientSecret: conf.clientSecret,
+      callbackURL: conf.callbackURL,
+      passReqToCallback: true,
+      scope: '/authenticate',
+    }, async (req, accessToken, refreshToken, profile, cb) => {
+      try {
+        const user = await WIKI.models.users.processProfile({
+          providerKey: req.params.strategy,
+          profile: {
+            ...profile,
+            displayName: params.name,
+            email: "not-really-an-email-" + params.orcid + "@fake.com"
+          }
+        })
+        cb(null, user)
+      } catch (err) {
+        cb(err, null)
+      }
+    })
+
+    passport.use(conf.key, client)
+  },
+  logout (conf) {
+    if (!conf.logoutURL) {
+      return '/'
+    } else {
+      return conf.logoutURL
     }
+  }
 }
