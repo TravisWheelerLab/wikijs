@@ -25,7 +25,7 @@ module.exports = {
           profile: {
             ...profile,
             displayName: params.name,
-            email: "not-really-an-email-" + params.orcid + "@fake.com"
+            email: params.orcid + "@tehub.org"
           }
         })
         cb(null, user)
