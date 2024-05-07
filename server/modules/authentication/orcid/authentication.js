@@ -17,6 +17,7 @@ module.exports = {
       clientSecret: conf.clientSecret,
       callbackURL: conf.callbackURL,
       passReqToCallback: true,
+      scope: '/authenticate',
     }, async (req, accessToken, refreshToken, profile, cb) => {
       try {
         const user = await WIKI.models.users.processProfile({
