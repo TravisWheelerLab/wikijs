@@ -34,6 +34,20 @@ module.exports = {
       }
     })
 
+    client.userProfile = function (accesstoken, done) {
+      this._oauth2._useAuthorizationHeaderForGET = !conf.useQueryStringForAccessToken
+      this._oauth2.get(conf.userInfoURL, accesstoken, (err, data) => {
+        if (err) {
+          return done(err)
+        }
+        try {
+          data = JSON.parse(data)
+        } catch (e) {
+          return done(e)
+        }
+        done(null, data)
+      })
+    }
     passport.use('orcid', client)
   },
   logout (conf) {
