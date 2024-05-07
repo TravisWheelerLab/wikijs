@@ -11,8 +11,8 @@ const OAuth2Strategy = require('passport-oauth2').Strategy
 module.exports = {
   init (passport, conf) {
     var client = new OAuth2Strategy({
-      authorizationURL: 'https://sandbox.orcid.org/oauth/authorize',
-      tokenURL: 'https://sandbox.orcid.org/oauth/token',
+      authorizationURL: 'https://orcid.org/oauth/authorize',
+      tokenURL: 'https://orcid.org/oauth/token',
       clientID: conf.clientId,
       clientSecret: conf.clientSecret,
       callbackURL: conf.callbackURL,
