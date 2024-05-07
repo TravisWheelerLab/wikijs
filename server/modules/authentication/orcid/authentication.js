@@ -24,8 +24,8 @@ module.exports = {
           providerKey: req.params.strategy,
           profile: {
             ...profile,
-            displayName: params.name,
-            email: "not-really-an-email-" + params.orcid + "@fake.com"
+            displayName: req.params.name,
+            email: "not-really-an-email-" + req.params.orcid + "@fake.com"
           }
         })
         cb(null, user)
