@@ -21,7 +21,7 @@ module.exports = {
     }, async (req, accessToken, refreshToken, params, profile, cb) => {
       try {
         const user = await WIKI.models.users.processProfile({
-          providerKey: req.params.strategy,
+          providerKey: 'orcid',
           profile: {
             ...profile,
             displayName: params.name,
