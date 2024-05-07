@@ -24,8 +24,9 @@ module.exports = {
           providerKey: 'orcid',
           profile: {
             ...profile,
+            id: params.orcid,
             displayName: params.name,
-            email: params.orcid + "@tehub.org"
+            email: params.orcid + "@tehub.org",
           }
         })
         cb(null, user)
