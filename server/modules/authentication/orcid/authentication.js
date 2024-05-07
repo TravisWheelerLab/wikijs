@@ -48,7 +48,7 @@ module.exports = {
         done(null, data)
       })
     }
-    passport.use('orcid', client)
+    passport.use(conf.key, client)
   },
   logout (conf) {
     if (!conf.logoutURL) {
