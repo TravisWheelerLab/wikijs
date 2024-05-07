@@ -21,7 +21,7 @@ module.exports = {
     }, async (req, accessToken, refreshToken, params, profile, cb) => {
       try {
         const user = await WIKI.models.users.processProfile({
-          providerKey: 'orcid',
+          providerKey: req.params.strategy,
           profile: {
             ...profile,
             displayName: params.name,
@@ -48,7 +48,7 @@ module.exports = {
         done(null, data)
       })
     }
-    passport.use('orcid', client)
+    passport.use(conf.key, client)
   },
   logout (conf) {
     if (!conf.logoutURL) {
