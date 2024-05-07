@@ -1,46 +1,59 @@
+const _ = require('lodash')
+
 /* global WIKI */
 
-const _ = require('lodash')
-var OAuth2Strategy = require('passport-oauth2')
+// ------------------------------------
+// ORCID Account
+// ------------------------------------
 
-function OrcidStrategy(options, verify) {
-    options.scope = options.scope || '/authenticate'
-    if (options.sandbox) {
-        options.authorizationURL = 'https://sandbox.orcid.org/oauth/authorize'
-        options.tokenURL = 'https://sandbox.orcid.org/oauth/token'
-    } else {
-        options.authorizationURL = 'https://orcid.org/oauth/authorize'
-        options.tokenURL = 'https://orcid.org/oauth/token'
-    }
-    delete options.sandbox
-    OAuth2Strategy.call(this, options, verify)
-    this.name = 'orcid'
-}
+const OAuth2Strategy = require('passport-oauth2').Strategy
 
 module.exports = {
-    init(passport, conf) {
-        passport.use('orcid',
-            new OrcidStrategy({
-                // sandbox: process.env.NODE_ENV !== 'production',
-                sandbox: false,
-                clientID: conf.clientId,
-                clientSecret: conf.clientSecret,
-                callbackURL: conf.callbackURL
-            }, async (accessToken, refreshToken, params, profile, cb) => {
-                try {
-                    const user = await WIKI.models.users.processProfile({
-                        profile: {
-                            email: "not-really-an-email-" + params.orcid + "@fake.com",
-                            displayName: params.name,
-                            ...profile,
-                        },
-                        providerKey: 'orcid'
-                    })
-                    cb(null, user)
-                } catch (err) {
-                    cb(err, null)
-                }
-            })
-        )
+  init (passport, conf) {
+    var client = new OAuth2Strategy({
+      authorizationURL: 'https://sandbox.orcid.org/oauth/authorize',
+      tokenURL: 'https://sandbox.orcid.org/oauth/token',
+      clientID: conf.clientId,
+      clientSecret: conf.clientSecret,
+      callbackURL: conf.callbackURL,
+      passReqToCallback: true,
+    }, async (req, accessToken, refreshToken, profile, cb) => {
+      try {
+        const user = await WIKI.models.users.processProfile({
+          providerKey: req.params.strategy,
+          profile: {
+            ...profile,
+            displayName: params.name,
+            email: "not-really-an-email-" + params.orcid + "@fake.com"
+          }
+        })
+        cb(null, user)
+      } catch (err) {
+        cb(err, null)
+      }
+    })
+
+    client.userProfile = function (accesstoken, done) {
+      this._oauth2._useAuthorizationHeaderForGET = !conf.useQueryStringForAccessToken
+      this._oauth2.get(conf.userInfoURL, accesstoken, (err, data) => {
+        if (err) {
+          return done(err)
+        }
+        try {
+          data = JSON.parse(data)
+        } catch (e) {
+          return done(e)
+        }
+        done(null, data)
+      })
     }
+    passport.use(conf.key, client)
+  },
+  logout (conf) {
+    if (!conf.logoutURL) {
+      return '/'
+    } else {
+      return conf.logoutURL
+    }
+  }
 }
